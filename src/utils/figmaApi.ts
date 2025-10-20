@@ -28,8 +28,36 @@ export async function fetchFigmaData(
       throw new Error('Node not found in Figma file');
     }
 
+    console.log('Node found:', nodeData.name, 'Type:', nodeData.type);
+    console.log('Node has children:', nodeData.children?.length || 0);
+    
+    // Debug: Print node tree structure
+    console.log('===== FIGMA NODE TREE STRUCTURE =====');
+    printNodeTree(nodeData, 0, 3);
+    console.log('===== END NODE TREE =====');
+
     // Extract fields from the Figma node
     const fields = extractFieldsFromNode(nodeData);
+    
+    console.log(`\n✅ Extracted ${fields.length} fields from Figma`);
+    if (fields.length > 0) {
+      console.log('Sample fields:', fields.slice(0, 5));
+      console.table(fields.map(f => ({
+        section: f.section,
+        subsection: f.subsection,
+        field: f.fieldName,
+        order: f.order
+      })));
+    } else {
+      console.error('❌ No fields extracted!');
+      console.log('\nTrying aggressive field search...');
+      const aggressiveFields = aggressiveFieldExtraction(nodeData);
+      console.log(`Found ${aggressiveFields.length} fields with aggressive search`);
+      if (aggressiveFields.length > 0) {
+        return aggressiveFields;
+      }
+    }
+    
     return fields;
   } catch (error: any) {
     console.error('Error fetching Figma data:', error);
