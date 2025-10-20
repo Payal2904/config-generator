@@ -5,6 +5,12 @@ export interface FigmaNode {
   type: string;
   children?: FigmaNode[];
   characters?: string;
+  absoluteBoundingBox?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
 }
 
 export interface FigmaField {
