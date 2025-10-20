@@ -150,16 +150,21 @@ function cleanFieldName(name: string): string {
 
 /**
  * Parse Figma URL to extract file key and node ID
+ * Supports both /file/ and /design/ paths
  */
 export function parseFigmaUrl(url: string): { fileKey: string; nodeId: string } | null {
   try {
     const urlObj = new URL(url);
-    const pathMatch = urlObj.pathname.match(/\/file\/([^\/]+)/);
-    const nodeId = urlObj.searchParams.get('node-id');
+    // Modern Figma URLs use /design/, older ones use /file/
+    const pathMatch = urlObj.pathname.match(/\/(file|design)\/([^\/]+)/);
+    let nodeId = urlObj.searchParams.get('node-id');
 
     if (pathMatch && nodeId) {
+      // Figma URLs use hyphens (453-32363) but API expects colons (453:32363)
+      nodeId = nodeId.replace(/-/g, ':');
+      
       return {
-        fileKey: pathMatch[1],
+        fileKey: pathMatch[2], // File key is now in capture group 2
         nodeId: nodeId,
       };
     }
